@@ -24,7 +24,7 @@ class TreeNode
     // adding event listeners
     var that = this;
     this . codeElem . onclick = function () {
-      that . tree . changeActive ( that . codeElem );
+      that . tree . changeActive ( that );
     }
   }
   
@@ -279,7 +279,7 @@ class Tree
     {
       if ( children[i] . san == move [ "san" ] )
       {
-        this . changeActive ( children[i] . getCodeElem () );
+        this . changeActive ( children[i] );
         return;
       }
     }
@@ -294,17 +294,11 @@ class Tree
     
     current . insert ( node );
     
-    this . changeActive ( node . getCodeElem () );
+    this . changeActive ( node );
   }
   
-  changeActive ( codeElem )
+  changeActive ( node )
   {
-    if ( this . tree . codeMap . get ( codeElem ) == undefined )
-      throw "this node does not exist in Tree.codeMap!";
-    
-    let node = this . tree . codeMap . get ( codeElem );
-    let nodeFen = node . getFen ();
-    
     // ignore if the same one
     if ( this . tree . activeNode == node )
       return;
@@ -316,7 +310,7 @@ class Tree
     this . tree . activeNode = node;
     
     // update tree properties - if the fen is different
-    if ( this . chess . fen () != nodeFen )
+    if ( this . chess . fen () != node . getFen() )
     {
       this . chess = Chess ( node . getFen () );
       this . chessground . set ( {
@@ -334,7 +328,7 @@ class Tree
   
   resetRoot ()
   {
-    this . changeActive ( this . tree . root . getCodeElem () );
+    this . changeActive ( this . tree . root );
   }
   
   buildTree ()
