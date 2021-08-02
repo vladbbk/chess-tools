@@ -2,23 +2,20 @@ class TreeNode
 {
   constructor ( move, fen, apgn, parent, tree )
   {
-    this . san         = move [ "san" ];
-    this . algebraic   = ( move [ "from" ] == undefined ) ? [] : [ move [ "from"], move [ "to" ] ];
+    this . move        = move;
     this . fen         = fen;
     this . apgn        = apgn;
     this . parent      = parent;
     this . tree        = tree;
     
     this . children    = [];
-    this . childrenSan = [];
-    
     
     this . listElem    = null;
     this . commentElem = null;
     this . itemElem    = document . createElement ( "li" );
     this . codeElem    = document . createElement ( "code" );
     
-    this . codeElem . innerText = this . san;
+    this . codeElem . innerText = this . move [ "san" ];
     this . itemElem . appendChild ( this . codeElem );
     
     // adding event listeners
@@ -37,7 +34,6 @@ class TreeNode
     }
     
     this . children . push ( node );
-    this . childrenSan . push ( node [ "san" ] );
     
     this . listElem . appendChild ( node . getItemElem () );
   }
@@ -85,14 +81,18 @@ class TreeNode
     return [...this . children];
   }
   
-  getChildrenSan ()
+  getSan ()
   {
-    return [...this . childrenSan];
+    return this . move [ "san" ];
   }
   
   getAlgebraic ()
   {
-    return [...this . algebraic];
+    if ( this . move [ "from" ] == "" )
+      return [];
+    
+    return [ this . move [ "from" ], this . move [ "to" ] ];
+    // return [... this . algebraic];
   }
 }
 
@@ -242,13 +242,17 @@ class Tree
   
   drawTree ()
   {
-    let name = this . activeGame [ "name" ];
     // delete all children of the current tree 
     while ( this . treeElem . firstChild )
       this . treeElem . removeChild ( this . treeElem . lastChild );
 
     // initiate root 
-    var node = new TreeNode ( { "san": name }, this . chess . fen (), "", null, this );
+    var move = {
+      "san": this . activeGame [ "name" ],
+      "from": "",
+      "to": ""
+    }
+    var node = new TreeNode ( move, this . chess . fen (), "", null, this );
     
     this . tree . root = node 
     this . tree . activeNode = node;
@@ -273,7 +277,7 @@ class Tree
     
     for ( var i = 0; i < children . length; i++ )
     {
-      if ( children[i] . san == move [ "san" ] )
+      if ( children[i] . getSan() == move [ "san" ] )
       {
         this . changeActive ( children[i] );
         return;
