@@ -114,8 +114,6 @@ class Tree
     this . tree = {
       root: null,
       activeNode: null,
-      codeMap: new Map(),
-      fenMap: new Map()
     }
 
     
@@ -255,8 +253,6 @@ class Tree
     this . tree . root = node 
     this . tree . activeNode = node;
     
-    this . tree . codeMap . set ( node . getCodeElem (), node );
-    this . tree . fenMap . set ( node . getFen (), node );
     
     // create the <ul> list
     let list = document . createElement ( "ul" );
@@ -289,8 +285,6 @@ class Tree
     let apgn = current [ "apgn" ] == "" ? move [ "san" ] : current [ "apgn" ] + ' ' + move [ "san" ];
     
     let node = new TreeNode ( move, this . chess . fen (), apgn, current, this );
-    this . tree . codeMap . set ( node . getCodeElem (), node );
-    this . tree . fenMap . set ( node . getFen (), node );
     
     current . insert ( node );
     
