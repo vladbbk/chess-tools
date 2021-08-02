@@ -82,12 +82,12 @@ class TreeNode
   
   getChildren ()
   {
-    return this . children;
+    return [...this . children];
   }
   
   getChildrenSan ()
   {
-    return this . childrenSan;
+    return [...this . childrenSan];
   }
   
   getAlgebraic ()
@@ -267,6 +267,8 @@ class Tree
     list . appendChild ( node . getItemElem () );
     
     node . highlight ();
+    
+    this . buildTree();
   }
   
   newMove ( move )
@@ -314,8 +316,7 @@ class Tree
     this . tree . activeNode = node;
     
     // update tree properties - if the fen is different
-    if ( this . chess . fen () != nodeFen
-      && this . chessground . getFen () != nodeFen . split ( ' ' )[0] )
+    if ( this . chess . fen () != nodeFen )
     {
       this . chess = Chess ( node . getFen () );
       this . chessground . set ( {
@@ -329,5 +330,27 @@ class Tree
         lastMove: node . getAlgebraic ()
       } );
     }
+  }
+  
+  resetRoot ()
+  {
+    this . changeActive ( this . tree . root . getCodeElem () );
+  }
+  
+  buildTree ()
+  {
+    for ( var i = 0; i < this . activeGame . branches . length; i++ )
+    {
+      // set root as new active -- resets engine & board
+      this . resetRoot ()
+      
+      let moves = this . activeGame . branches[i] [ "pgn" ] . split ( ' ' );
+      
+      for ( var j = 0; j < moves . length; j++ )
+        this . newMove ( this . chess . move ( moves[j] ) );
+    }
+    
+    // reset the board again
+    this . resetRoot ();
   }
 }
