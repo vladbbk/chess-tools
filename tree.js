@@ -1,8 +1,9 @@
 class TreeNode
 {
-  constructor ( san, fen, apgn, parent, tree )
+  constructor ( move, fen, apgn, parent, tree )
   {
-    this . san         = san;
+    this . san         = move [ "san" ];
+    this . algebraic   = ( move [ "from" ] == undefined ) ? [] : [ move [ "from"], move [ "to" ] ];
     this . fen         = fen;
     this . apgn        = apgn;
     this . parent      = parent;
@@ -17,7 +18,7 @@ class TreeNode
     this . itemElem    = document . createElement ( "li" );
     this . codeElem    = document . createElement ( "code" );
     
-    this . codeElem . innerText = san;
+    this . codeElem . innerText = this . san;
     this . itemElem . appendChild ( this . codeElem );
     
     // adding event listeners
@@ -44,6 +45,11 @@ class TreeNode
   isLeaf ()
   {
     return this . children . length == 0;
+  }
+  
+  isRoot ()
+  {
+    return this . parent == null;
   }
   
   // --------------------------------------------------------------------------
@@ -82,6 +88,11 @@ class TreeNode
   getChildrenSan ()
   {
     return this . childrenSan;
+  }
+  
+  getAlgebraic ()
+  {
+    return [...this . algebraic];
   }
 }
 
@@ -224,8 +235,8 @@ class Tree
         }
       } );
       
-      // san move: move [ "san" ]
-      this . newMove ( move [ "san" ] );
+      
+      this . newMove ( move );
     }
   }
   // --------------------------------------------------------------------------
@@ -234,13 +245,12 @@ class Tree
   drawTree ()
   {
     let name = this . activeGame [ "name" ];
-    
     // delete all children of the current tree 
     while ( this . treeElem . firstChild )
       this . treeElem . removeChild ( this . treeElem . lastChild );
-    
+
     // initiate root 
-    var node = new TreeNode ( name, this . chess . fen (), "", null, this );
+    var node = new TreeNode ( { "san": name }, this . chess . fen (), "", null, this );
     
     this . tree . root = node 
     this . tree . activeNode = node;
@@ -259,13 +269,13 @@ class Tree
     node . highlight ();
   }
   
-  newMove ( san )
+  newMove ( move )
   {
     let children = this . tree . activeNode . getChildren ();
     
     for ( var i = 0; i < children . length; i++ )
     {
-      if ( children[i] . san == san )
+      if ( children[i] . san == move [ "san" ] )
       {
         this . changeActive ( children[i] . getCodeElem () );
         return;
@@ -274,9 +284,9 @@ class Tree
     
     // ( san, fen, apgn, parent, tree )
     let current = this . tree . activeNode;
-    let apgn = current [ "apgn" ] == "" ? san : current [ "apgn" ] + ' ' + san;
+    let apgn = current [ "apgn" ] == "" ? move [ "san" ] : current [ "apgn" ] + ' ' + move [ "san" ];
     
-    let node = new TreeNode ( san, this . chess . fen (), apgn, current, this );
+    let node = new TreeNode ( move, this . chess . fen (), apgn, current, this );
     this . tree . codeMap . set ( node . getCodeElem (), node );
     this . tree . fenMap . set ( node . getFen (), node );
     
@@ -307,8 +317,6 @@ class Tree
     if ( this . chess . fen () != nodeFen
       && this . chessground . getFen () != nodeFen . split ( ' ' )[0] )
     {
-      // TODO: last move highlighting
-      
       this . chess = Chess ( node . getFen () );
       this . chessground . set ( {
         turnColor: ( this . chess . turn () === 'w' ) ? "white" : "black",
@@ -317,7 +325,8 @@ class Tree
         movable: {
           color: ( this . chess . turn () === 'w' ) ? "white" : "black",
           dests: this . legalMoves (),
-        }
+        },
+        lastMove: node . getAlgebraic ()
       } );
     }
   }
